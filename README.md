@@ -15,12 +15,15 @@ A UE4SS Lua mod for Subnautica 2 that lets you collect creature DNA and transfor
 | Key | Action |
 |-----|--------|
 | `G` | Open/close creature selection wheel |
-| `F` | Primary ability (when transformed) |
+| `T` | Primary ability (when transformed) |
 | `R` | Secondary ability (when transformed) |
 | `H` | Revert to human (panic button) |
-| `[` / `]` | Cycle previous/next form (debug) |
+| `[` | Cycle to previous creature form (debug) |
+| `]` | Cycle to next creature form (debug) |
 | `F8` | Unlock all forms instantly (debug) |
 | `F9` | Reset all DNA progress (debug) |
+
+All keys except F8/F9 are configurable via `settings.txt` (or the in-game Settings panel if TheGoldModSettings.dll is installed). Key changes require `Ctrl+R` (hot-reload) to take effect.
 
 ## Installation
 

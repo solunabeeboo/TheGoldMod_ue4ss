@@ -33,18 +33,34 @@ local _WHEEL_KEY     = "G"
 local _PRIMARY_KEY   = "T"
 local _SECONDARY_KEY = "R"
 local _REVERT_KEY    = "H"
+local _PREV_KEY      = "["
+local _NEXT_KEY      = "]"
 local _autoUnlock    = true
+
+-- Maps printable key strings from settings.txt to VK codes for keys that
+-- can't be looked up via Key["name"] (brackets, punctuation, etc.).
+local _VK = {
+    ["["] = 219, ["]"] = 221, [";"] = 186, ["'"] = 222,
+    [","] = 188, ["."] = 190, ["/"] = 191, ["\\"] = 220,
+    ["-"] = 189, ["="] = 187, ["`"] = 192,
+}
+
+local function ResolveKey(name)
+    return _VK[name] or Key[name]
+end
 
 local function LoadSettings()
     local f = io.open(_SETTINGS_PATH, "r")
     if not f then return end
     for line in f:lines() do
-        local k, v = line:match("^(%w+)=(.+)$")
-        if     k == "WheelKey"     and v then _WHEEL_KEY     = v
-        elseif k == "PrimaryKey"   and v then _PRIMARY_KEY   = v
-        elseif k == "SecondaryKey" and v then _SECONDARY_KEY = v
-        elseif k == "RevertKey"    and v then _REVERT_KEY    = v
-        elseif k == "AutoUnlock"   and v then _autoUnlock    = (v == "true") end
+        local k, v = line:match("^(%w+)=(.-)%s*$")
+        if     k == "WheelKey"        and v ~= "" then _WHEEL_KEY     = v
+        elseif k == "PrimaryKey"      and v ~= "" then _PRIMARY_KEY   = v
+        elseif k == "SecondaryKey"    and v ~= "" then _SECONDARY_KEY = v
+        elseif k == "RevertKey"       and v ~= "" then _REVERT_KEY    = v
+        elseif k == "PrevCreatureKey" and v ~= "" then _PREV_KEY      = v
+        elseif k == "NextCreatureKey" and v ~= "" then _NEXT_KEY      = v
+        elseif k == "AutoUnlock"                  then _autoUnlock    = (v == "true") end
     end
     f:close()
 end
@@ -231,18 +247,18 @@ local function TransformToIndex(index)
     end)
 end
 
-RegisterKeyBind(219, function()  -- [ (VK_OEM_4)
+RegisterKeyBind(ResolveKey(_PREV_KEY), function()
     ExecuteInGameThread(function()
         TransformToIndex(_testIndex - 1)
     end)
 end)
 
-RegisterKeyBind(221, function()  -- ] (VK_OEM_6)
+RegisterKeyBind(ResolveKey(_NEXT_KEY), function()
     ExecuteInGameThread(function()
         TransformToIndex(_testIndex + 1)
     end)
 end)
 
 Log(string.format(
-    "TheGoldMod ready — %s=Wheel  %s=Primary  %s=Secondary  %s=Revert  F8=UnlockAll  F9=Reset  [=Prev  ]=Next",
-    _WHEEL_KEY, _PRIMARY_KEY, _SECONDARY_KEY, _REVERT_KEY))
+    "TheGoldMod ready — %s=Wheel  %s=Primary  %s=Secondary  %s=Revert  F8=UnlockAll  F9=Reset  %s=Prev  %s=Next",
+    _WHEEL_KEY, _PRIMARY_KEY, _SECONDARY_KEY, _REVERT_KEY, _PREV_KEY, _NEXT_KEY))

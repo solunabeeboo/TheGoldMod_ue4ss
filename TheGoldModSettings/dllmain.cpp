@@ -26,16 +26,20 @@
 
 struct GMSettings
 {
-    std::string wheelKey     = "G";
-    std::string primaryKey   = "T";
-    std::string secondaryKey = "R";
-    std::string revertKey    = "H";
-    bool        autoUnlock   = true;
+    std::string wheelKey        = "G";
+    std::string primaryKey      = "T";
+    std::string secondaryKey    = "R";
+    std::string revertKey       = "H";
+    std::string prevCreatureKey = "[";
+    std::string nextCreatureKey = "]";
+    bool        autoUnlock      = true;
 
     bool operator==(const GMSettings& o) const
     {
         return wheelKey == o.wheelKey && primaryKey == o.primaryKey &&
                secondaryKey == o.secondaryKey && revertKey == o.revertKey &&
+               prevCreatureKey == o.prevCreatureKey &&
+               nextCreatureKey == o.nextCreatureKey &&
                autoUnlock == o.autoUnlock;
     }
     bool operator!=(const GMSettings& o) const { return !(*this == o); }
@@ -68,11 +72,13 @@ static GMSettings LoadSettings()
         std::string key = line.substr(0, eq);
         std::string val = line.substr(eq + 1);
         if (!val.empty() && val.back() == '\r') val.pop_back();
-        if      (key == "WheelKey"     && !val.empty()) s.wheelKey     = val;
-        else if (key == "PrimaryKey"   && !val.empty()) s.primaryKey   = val;
-        else if (key == "SecondaryKey" && !val.empty()) s.secondaryKey = val;
-        else if (key == "RevertKey"    && !val.empty()) s.revertKey    = val;
-        else if (key == "AutoUnlock")  s.autoUnlock = (val == "true" || val == "1");
+        if      (key == "WheelKey"        && !val.empty()) s.wheelKey        = val;
+        else if (key == "PrimaryKey"      && !val.empty()) s.primaryKey      = val;
+        else if (key == "SecondaryKey"    && !val.empty()) s.secondaryKey    = val;
+        else if (key == "RevertKey"       && !val.empty()) s.revertKey       = val;
+        else if (key == "PrevCreatureKey" && !val.empty()) s.prevCreatureKey = val;
+        else if (key == "NextCreatureKey" && !val.empty()) s.nextCreatureKey = val;
+        else if (key == "AutoUnlock") s.autoUnlock = (val == "true" || val == "1");
     }
     return s;
 }
@@ -81,11 +87,13 @@ static void SaveSettings(const GMSettings& s)
 {
     std::ofstream f(GetModRootDir() / L"settings.txt");
     if (!f.is_open()) return;
-    f << "WheelKey="     << s.wheelKey     << "\n";
-    f << "PrimaryKey="   << s.primaryKey   << "\n";
-    f << "SecondaryKey=" << s.secondaryKey << "\n";
-    f << "RevertKey="    << s.revertKey    << "\n";
-    f << "AutoUnlock="   << (s.autoUnlock ? "true" : "false") << "\n";
+    f << "WheelKey="        << s.wheelKey        << "\n";
+    f << "PrimaryKey="      << s.primaryKey      << "\n";
+    f << "SecondaryKey="    << s.secondaryKey    << "\n";
+    f << "RevertKey="       << s.revertKey       << "\n";
+    f << "PrevCreatureKey=" << s.prevCreatureKey << "\n";
+    f << "NextCreatureKey=" << s.nextCreatureKey << "\n";
+    f << "AutoUnlock="      << (s.autoUnlock ? "true" : "false") << "\n";
 }
 
 // ── Key presets ───────────────────────────────────────────────────────────────
@@ -448,6 +456,8 @@ class TheGoldModSettingsMod : public RC::CppUserModBase
     char m_primaryBuf[64]{};
     char m_secondaryBuf[64]{};
     char m_revertBuf[64]{};
+    char m_prevCreatureBuf[64]{};
+    char m_nextCreatureBuf[64]{};
 
     std::atomic<bool> m_unrealReady{false};
     int               m_pollTick = 0;
@@ -583,13 +593,17 @@ private:
         ImGui::PopStyleColor();
         ImGui::Spacing();
 
-        RenderKeyRow("Wheel",     "##wheel",     "Open / close the creature selection wheel.", m_edit.wheelKey,     m_wheelBuf,     sizeof(m_wheelBuf));
+        RenderKeyRow("Wheel",        "##wheel",        "Open / close the creature selection wheel.",      m_edit.wheelKey,        m_wheelBuf,        sizeof(m_wheelBuf));
         ImGui::Spacing();
-        RenderKeyRow("Primary",   "##primary",   "Activate primary ability while transformed.", m_edit.primaryKey,   m_primaryBuf,   sizeof(m_primaryBuf));
+        RenderKeyRow("Primary",      "##primary",      "Activate primary ability while transformed.",      m_edit.primaryKey,      m_primaryBuf,      sizeof(m_primaryBuf));
         ImGui::Spacing();
-        RenderKeyRow("Secondary", "##secondary", "Activate secondary ability while transformed.", m_edit.secondaryKey, m_secondaryBuf, sizeof(m_secondaryBuf));
+        RenderKeyRow("Secondary",    "##secondary",    "Activate secondary ability while transformed.",    m_edit.secondaryKey,    m_secondaryBuf,    sizeof(m_secondaryBuf));
         ImGui::Spacing();
-        RenderKeyRow("Revert",    "##revert",    "Revert to human instantly (panic button).", m_edit.revertKey,    m_revertBuf,    sizeof(m_revertBuf));
+        RenderKeyRow("Revert",       "##revert",       "Revert to human instantly (panic button).",        m_edit.revertKey,       m_revertBuf,       sizeof(m_revertBuf));
+        ImGui::Spacing();
+        RenderKeyRow("Prev Creature","##prevCreature", "Cycle to the previous creature form (test mode).", m_edit.prevCreatureKey, m_prevCreatureBuf, sizeof(m_prevCreatureBuf));
+        ImGui::Spacing();
+        RenderKeyRow("Next Creature","##nextCreature", "Cycle to the next creature form (test mode).",     m_edit.nextCreatureKey, m_nextCreatureBuf, sizeof(m_nextCreatureBuf));
 
         ImGui::Spacing();
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.00f, 0.80f, 0.30f, 0.85f));
@@ -697,10 +711,12 @@ private:
 
     void SyncCustomBufs()
     {
-        strncpy_s(m_wheelBuf,     m_edit.wheelKey.c_str(),     sizeof(m_wheelBuf) - 1);
-        strncpy_s(m_primaryBuf,   m_edit.primaryKey.c_str(),   sizeof(m_primaryBuf) - 1);
-        strncpy_s(m_secondaryBuf, m_edit.secondaryKey.c_str(), sizeof(m_secondaryBuf) - 1);
-        strncpy_s(m_revertBuf,    m_edit.revertKey.c_str(),     sizeof(m_revertBuf) - 1);
+        strncpy_s(m_wheelBuf,        m_edit.wheelKey.c_str(),        sizeof(m_wheelBuf) - 1);
+        strncpy_s(m_primaryBuf,      m_edit.primaryKey.c_str(),      sizeof(m_primaryBuf) - 1);
+        strncpy_s(m_secondaryBuf,    m_edit.secondaryKey.c_str(),    sizeof(m_secondaryBuf) - 1);
+        strncpy_s(m_revertBuf,       m_edit.revertKey.c_str(),       sizeof(m_revertBuf) - 1);
+        strncpy_s(m_prevCreatureBuf, m_edit.prevCreatureKey.c_str(), sizeof(m_prevCreatureBuf) - 1);
+        strncpy_s(m_nextCreatureBuf, m_edit.nextCreatureKey.c_str(), sizeof(m_nextCreatureBuf) - 1);
     }
 };
 

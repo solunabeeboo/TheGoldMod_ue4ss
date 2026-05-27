@@ -2,4 +2,6 @@ WheelKey=G
 PrimaryKey=T
 SecondaryKey=R
 RevertKey=H
+PrevCreatureKey=[
+NextCreatureKey=]
 AutoUnlock=true

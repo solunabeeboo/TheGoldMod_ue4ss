@@ -270,9 +270,29 @@ local function SpawnPuppet(creatureEntry)
         local cvOk, cv = pcall(function() return ctrl:IsValid() end)
         if cvOk and cv then
             pcall(function() ctrl:UnPossess() end)
-            Log("AI controller unpossessed")
+            pcall(function() ctrl:Destroy() end)
+            Log("AI controller destroyed")
         end
     end
+
+    -- Disable the AnimBP so UWEAnimNotify_AbilityNotify / SN2AnimNotify_ShapeOverlap never fire.
+    -- These are native C++ notifies baked into creature anim sequences; they AV ~2-10s after
+    -- spawn when the ability system or pawn state is not in the expected possessed/ticking state.
+    -- Use GetMesh() (UFUNCTION, reliable) not puppet.Mesh (property, returns nil for creature BPs).
+    -- SetAnimationMode(0) = AnimationSingleNode — disables ABP evaluation entirely.
+    pcall(function()
+        local mesh = puppet:GetMesh()
+        if not mesh or not mesh:IsValid() then
+            Log("AnimBP: GetMesh() returned nil — animations NOT suppressed")
+            return
+        end
+        local ok, err = pcall(function() mesh:SetAnimationMode(0) end)
+        if ok then
+            Log("AnimBP disabled on puppet (AnimationSingleNode)")
+        else
+            Log("AnimBP: SetAnimationMode failed: " .. tostring(err))
+        end
+    end)
 
     pcall(function() puppet:SetActorEnableCollision(false) end)
 
