@@ -57,7 +57,7 @@ static std::filesystem::path GetModRootDir()
 static GMSettings LoadSettings()
 {
     GMSettings s;
-    std::ifstream f(GetModRootDir() / L"settings.ini");
+    std::ifstream f(GetModRootDir() / L"settings.txt");
     if (!f.is_open()) return s;
 
     std::string line;
@@ -79,7 +79,7 @@ static GMSettings LoadSettings()
 
 static void SaveSettings(const GMSettings& s)
 {
-    std::ofstream f(GetModRootDir() / L"settings.ini");
+    std::ofstream f(GetModRootDir() / L"settings.txt");
     if (!f.is_open()) return;
     f << "WheelKey="     << s.wheelKey     << "\n";
     f << "PrimaryKey="   << s.primaryKey   << "\n";

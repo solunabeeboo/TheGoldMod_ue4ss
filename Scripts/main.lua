@@ -26,7 +26,7 @@ Log("Initializing TheGoldMod v0.1")
 -- ── Settings ──────────────────────────────────────────────────────────────
 -- Written by TheGoldModSettings C++ mod. Defaults match the ImGui panel defaults.
 
-local _SETTINGS_PATH = "ue4ss/Mods/TheGoldMod/settings.ini"
+local _SETTINGS_PATH = "ue4ss/Mods/TheGoldMod/settings.txt"
 local _SETTINGS_FLAG = "ue4ss/Mods/TheGoldMod/settings_open.flag"
 
 local _WHEEL_KEY     = "G"
@@ -65,7 +65,7 @@ if _autoUnlock then
 end
 
 -- ── Keybinds ──────────────────────────────────────────────────────────────
--- Keys are read from settings.ini on each hot-reload (Ctrl+R).
+-- Keys are read from settings.txt on each hot-reload (Ctrl+R).
 
 RegisterKeyBind(Key[_WHEEL_KEY], function()
     ExecuteInGameThread(function()
