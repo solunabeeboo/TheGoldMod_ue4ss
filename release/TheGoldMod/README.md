@@ -38,6 +38,11 @@ The folder must be named exactly `TheGoldMod` (UE4SS uses the folder name as the
 - Subnautica 2 (Early Access, UE 5.6)
 - UE4SS v3.0.1 Beta or later
 
+## Known Issues
+
+- Transformation causes a game crash ~40–70 seconds after spawning certain creature BPs due to the `UWEAIControllerTicker` C++ singleton. Revert to human before the crash window or keep sessions short.
+- `spawnRisk = true` creatures (ElusiveLeviathan, VoidLeviathanMother, WaterSlug) are blocked from spawning.
+
 ## Architecture
 
 - `main.lua` — entry point, keybinds, level hooks
