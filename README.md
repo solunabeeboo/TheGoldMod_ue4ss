@@ -4,11 +4,11 @@ A UE4SS Lua mod for Subnautica 2 that lets you collect creature DNA and transfor
 
 ## Features
 
-- **27 transformable creatures** — small, medium, large, and leviathan tiers
-- **DNA collection system** — use the Biosampler near creatures to extract DNA samples
-- **Per-creature abilities** — every creature has a unique F (primary) and R (secondary) ability
-- **Puppet architecture** — spawns the real creature Blueprint, syncs position to player at 60 Hz
-- **Persistent DNA saves** — unlocked forms survive game restarts
+- **27 transformable creatures**  small, medium, large, and leviathan tiers
+- **DNA collection system**  use the Biosampler near creatures to extract DNA samples
+- **Per-creature abilities**  every creature has a unique F (primary) and R (secondary) ability
+- **Puppet architecture**  spawns the real creature Blueprint, syncs position to player at 60 Hz
+- **Persistent DNA saves**  unlocked forms survive game restarts
 
 ## Controls
 
@@ -29,7 +29,7 @@ A UE4SS Lua mod for Subnautica 2 that lets you collect creature DNA and transfor
    ```
    Subnautica2\Binaries\Win64\ue4ss\Mods\
    ```
-3. Launch the game — the mod loads automatically
+3. Launch the game  the mod loads automatically
 
 The folder must be named exactly `TheGoldMod` (UE4SS uses the folder name as the mod identifier).
 
@@ -40,10 +40,10 @@ The folder must be named exactly `TheGoldMod` (UE4SS uses the folder name as the
 
 ## Architecture
 
-- `main.lua` — entry point, keybinds, level hooks
-- `creature_db.lua` — all creature stats and ability definitions
-- `transformation.lua` — BP puppet spawn/sync system
-- `traits.lua` — all active ability implementations
-- `dna_system.lua` — DNA collection/processing and save/load
-- `extractor_tool.lua` — Biosampler integration and creature proximity detection
-- `wheel_bridge.lua` — UI selection wheel
+- `main.lua`  entry point, keybinds, level hooks
+- `creature_db.lua`  all creature stats and ability definitions
+- `transformation.lua`  BP puppet spawn/sync system
+- `traits.lua`  all active ability implementations
+- `dna_system.lua`  DNA collection/processing and save/load
+- `extractor_tool.lua`  Biosampler integration and creature proximity detection
+- `wheel_bridge.lua`  UI selection wheel
